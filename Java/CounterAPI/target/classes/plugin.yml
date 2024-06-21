@@ -1,0 +1,11 @@
+name: CounterAPI
+main: org.szucraft.counterapi.CounterAPI
+version: 1.0
+api-version: 1.16
+softdepend: [PlaceholderAPI]
+
+commands:
+  counter:
+    aliases: [szucounter]
+    description: "/szucounter set/add/reset"
+    permission: "szuapi.counter"

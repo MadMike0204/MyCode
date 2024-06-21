@@ -43,7 +43,7 @@ class Player
         }
         void printPlayer()
         {
-            cout << "çƒå‘˜å§“å:" << name << " èº«é«˜:" << height << " ä½“é‡:" << weight << endl;
+            cout << "ÇòÔ±ÐÕÃû:" << name << " Éí¸ß:" << height << " ÌåÖØ:" << weight << endl;
         }
 };
 class MVP:public Player
@@ -65,11 +65,11 @@ class MVP:public Player
         }
         void print()
         {
-            cout << "MVPå¹´ä»½:" << year 
+            cout << "MVPÄê·Ý:" << year 
                  << fixed << setprecision(1)
-                 << " å¾—åˆ†:" << score 
-                 << " ç¯®æ¿:" << rebound 
-                 << " åŠ©æ”»:" << assist << endl;
+                 << " µÃ·Ö:" << score 
+                 << " Àº°å:" << rebound 
+                 << " Öú¹¥:" << assist << endl;
         }
 };
 class DPOY:public Player
@@ -91,11 +91,11 @@ class DPOY:public Player
         }
         void print()
         {
-            cout << "DPOYå¹´ä»½:" << year 
+            cout << "DPOYÄê·Ý:" << year 
                  << fixed << setprecision(1)
-                 << " ç›–å¸½:" << block 
-                 << " ç¯®æ¿:" << rebound 
-                 << " æŠ¢æ–­:" << steal << endl;
+                 << " ¸ÇÃ±:" << block 
+                 << " Àº°å:" << rebound 
+                 << " ÇÀ¶Ï:" << steal << endl;
         }
 };
 

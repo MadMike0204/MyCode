@@ -1,0 +1,2 @@
+PLACE .FILL x45A7
+      LDI R3,PLACE
