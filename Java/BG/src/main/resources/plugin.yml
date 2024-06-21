@@ -1,0 +1,11 @@
+name: BuildAndGuess
+main: org.szucraft.buildandguess.BuildAndGuess
+version: 1.0
+api-version: 1.16
+softdepend: [PlaceholderAPI]
+
+commands:
+  buildandguess:
+    aliases: [bng]
+    description: "Command root for Build And Guess Plugin"
+    permission: "szu.bng"
