@@ -1,0 +1,12 @@
+s= input("请以'20xx年,新药上市数量\n28xx年,新药上市数量'的格式输入数据，注意逗号为英文:")
+ls = s.split("\n")
+print("数据初步切分为如下列表:")
+print(ls)
+print()
+lsls =[i.split(",")for i in ls]
+print("数据二次处理为如下列表:")
+print(lsls)
+print()
+lsls.sort(key=lambda x:int(x[1]),reverse=True)
+print("最终排序结果为:")
+print("\n".join(":".join(i)for i in lsls))

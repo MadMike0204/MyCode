@@ -1,0 +1,13 @@
+//Symbol Name		Page Address
+//----------------	------------
+//	COUNT                   301D
+//	DELAY1                  300D
+//	DELAY2                  3016
+//	InF                     301B
+//	InPtr                   301A
+//	KBSR                    3062
+//	LOOP                    3006
+//	StaPtr                  301C
+//	str1                    301E
+//	str2                    3040
+//	x_4000                  3063
