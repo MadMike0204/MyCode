@@ -56,7 +56,7 @@ int main(){
     // cout << "Max:" << Max<double>(x,y) << endl;
     MyVar<double> jojo(2,2.3,2.333);
     cout << jojo.getMax() << endl;
-    
+    cout << "Test" << endl;    
 
     return 0;
 }
