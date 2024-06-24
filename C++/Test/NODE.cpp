@@ -2,10 +2,11 @@
 using namespace std;
 
 template<typename T>
+//定义节点
 struct Node
 {
-    T data;
-    Node<T>* next;
+    T data;//存储数据
+    Node<T>* next;//指向下一个节点
 
     Node(T data):
         data(data),next(nullptr){}
@@ -18,7 +19,7 @@ class LinkedList
         Node<T>* head;
     public:
         LinkedList():
-            head(nullptr){}
+            head(nullptr){}//初始化为空指针
         ~LinkedList()
         {
             clear();
