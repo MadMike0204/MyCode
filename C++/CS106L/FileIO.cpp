@@ -15,7 +15,7 @@ int main(){
         cerr << "Could not open Myfile" << endl;
     
     ofstream MyWriter("WriterTester.txt");
-    
+    MyWriter << "JOJO)";
 
     return 0;
 }
