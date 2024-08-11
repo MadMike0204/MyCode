@@ -1,0 +1,396 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <queue>
+#include <unordered_map>
+#include <cmath>
+#include <dirent.h>
+#include <string.h>
+#include "opencv2/opencv.hpp"
+#include "opencv2/imgproc/types_c.h"
+#include "opencv2/highgui/highgui.hpp"
+#include "acllite_dvpp_lite/ImageProc.h"
+#include "acllite_om_execute/ModelProc.h"
+#include "acllite_media/CameraRead.h"
+#include "acllite_dvpp_lite/VideoRead.h"
+#include "acllite_common/Queue.h"
+#include "label.h"
+
+using namespace std;
+using namespace acllite;
+using namespace cv;
+
+aclrtContext context = nullptr;
+uint32_t cvWidth = 1920;
+uint32_t cvHeight = 1080;
+cv::Mat cvImg = cv::Mat(cvHeight, cvWidth, CV_8UC3, cv::Scalar(0, 0, 0));
+uint32_t modelWidth = 640;
+uint32_t modelHeight = 640;
+bool exitFlag = false;
+struct MsgData {
+    std::shared_ptr<uint8_t> data = nullptr;
+    uint32_t size = 0;
+    bool videoEnd = false;
+    cv::Mat srcImg;
+};
+
+struct MsgOut {
+    cv::Mat srcImg;
+    bool videoEnd = false;
+    vector<InferenceOutput> inferOutputs;
+};
+
+Queue<MsgData> msgDataQueue(32);
+Queue<MsgOut> msgOutQueue(32);
+std::string displayMode = "";
+typedef struct BoundBox {
+        float x;  
+        float y;
+        float width;
+        float height;
+        float score;
+        size_t classIndex;
+        size_t index;
+    } BoundBox;
+
+bool Initparam(int argc, char *argv[])
+{
+    DIR *dir;
+    int outputDisplay = 1;
+    if ((dir = opendir("./out")) == NULL)
+        system("mkdir ./out");
+    int paramNum = 2;
+    if(argc != paramNum) {
+        LOG_PRINT("[ERROR] please choose output display mode: [./main imshow] [./main stdout]");
+        return false;
+    }
+    displayMode = argv[outputDisplay];
+    return true;
+}
+
+bool sortScore(BoundBox box1, BoundBox box2)
+{
+    return box1.score > box2.score;
+}
+
+void GetResult(std::vector<InferenceOutput>& inferOutputs,
+    cv::Mat& srcImage, uint32_t modelWidth, uint32_t modelHeight)
+{
+    uint32_t outputDataBufId = 0;
+    float *classBuff = static_cast<float *>(inferOutputs[outputDataBufId].data.get());
+    float confidenceThreshold = 0.25;
+    size_t classNum = 80;
+    size_t offset = 5;
+    size_t totalNumber = classNum + offset;
+    size_t modelOutputBoxNum = 25200;
+    size_t startIndex = 5;
+    int srcWidth = srcImage.cols;
+    int srcHeight = srcImage.rows;
+
+    vector <BoundBox> boxes;
+    size_t yIndex = 1;
+    size_t widthIndex = 2;
+    size_t heightIndex = 3;
+    size_t classConfidenceIndex = 4;
+    float widthScale = (float)(srcWidth) / modelWidth;
+    float heightScale = (float)(srcHeight) / modelHeight;
+    float finalScale = (widthScale > heightScale) ? widthScale : heightScale;
+    for (size_t i = 0; i < modelOutputBoxNum; ++i) {
+        float maxValue = 0;
+        float maxIndex = 0;
+        for (size_t j = startIndex; j < totalNumber; ++j) {
+            float value = classBuff[i * totalNumber + j] * classBuff[i * totalNumber + classConfidenceIndex];
+                if (value > maxValue) {
+                maxIndex = j - startIndex;
+                maxValue = value;
+            }
+        }
+        float classConfidence = classBuff[i * totalNumber + classConfidenceIndex];
+        if (classConfidence >= confidenceThreshold) {
+            size_t index = i * totalNumber + maxIndex + startIndex;
+            float finalConfidence =  classConfidence * classBuff[index];
+            BoundBox box;
+            box.x = classBuff[i * totalNumber] * finalScale;
+            box.y = classBuff[i * totalNumber + yIndex] * finalScale;
+            box.width = classBuff[i * totalNumber + widthIndex] * finalScale;
+            box.height = classBuff[i * totalNumber + heightIndex] * finalScale;
+            box.score = finalConfidence;
+            box.classIndex = maxIndex;
+            box.index = i;
+            if (maxIndex < classNum) {
+                boxes.push_back(box);
+            }
+        }
+           }
+    vector <BoundBox> result;
+    result.clear();
+    float NMSThreshold = 0.45;
+    int32_t maxLength = modelWidth > modelHeight ? modelWidth : modelHeight;
+    std::sort(boxes.begin(), boxes.end(), sortScore);
+    BoundBox boxMax;
+    BoundBox boxCompare;
+    while (boxes.size() != 0) {
+        size_t index = 1;
+        result.push_back(boxes[0]);
+        while (boxes.size() > index) {
+            boxMax.score = boxes[0].score;
+            boxMax.classIndex = boxes[0].classIndex;
+            boxMax.index = boxes[0].index;
+            boxMax.x = boxes[0].x + maxLength * boxes[0].classIndex;
+            boxMax.y = boxes[0].y + maxLength * boxes[0].classIndex;
+            boxMax.width = boxes[0].width;
+            boxMax.height = boxes[0].height;
+
+            boxCompare.score = boxes[index].score;
+            boxCompare.classIndex = boxes[index].classIndex;
+            boxCompare.index = boxes[index].index;
+            boxCompare.x = boxes[index].x + boxes[index].classIndex * maxLength;
+            boxCompare.y = boxes[index].y + boxes[index].classIndex * maxLength;
+            boxCompare.width = boxes[index].width;
+            boxCompare.height = boxes[index].height;
+            float xLeft = max(boxMax.x, boxCompare.x);
+            float yTop = max(boxMax.y, boxCompare.y);
+            float xRight = min(boxMax.x + boxMax.width, boxCompare.x + boxCompare.width);
+            float yBottom = min(boxMax.y + boxMax.height, boxCompare.y + boxCompare.height);
+            float width = max(0.0f, xRight - xLeft);
+            float hight = max(0.0f, yBottom - yTop);
+            float area = width * hight;
+            float iou =  area / (boxMax.width * boxMax.height + boxCompare.width * boxCompare.height - area);
+            if (iou > NMSThreshold) {
+                boxes.erase(boxes.begin() + index);
+                continue;
+            }
+            ++index;
+        }
+        boxes.erase(boxes.begin());
+    }
+    const double fountScale = 0.5;
+    const uint32_t lineSolid = 2;
+    const uint32_t labelOffset = 11;
+    const cv::Scalar fountColor(0, 0, 255);
+    const vector <cv::Scalar> colors{
+        cv::Scalar(237, 149, 100), cv::Scalar(0, 215, 255),
+        cv::Scalar(50, 205, 50), cv::Scalar(139, 85, 26)};
+
+    int half = 2;
+    string textPrint = "[";
+    for (size_t i = 0; i < result.size(); ++i) {
+        if (result[i].score < 0.7) {
+            continue;
+        }
+        cv::Point leftUpPoint, rightBottomPoint;
+        leftUpPoint.x = result[i].x - result[i].width / half;
+        leftUpPoint.y = result[i].y - result[i].height / half;
+        rightBottomPoint.x = result[i].x + result[i].width / half;
+        rightBottomPoint.y = result[i].y + result[i].height / half;
+        cv::rectangle(srcImage, leftUpPoint, rightBottomPoint, colors[i % colors.size()], lineSolid);
+        string className = label[result[i].classIndex];
+        string markString = to_string(result[i].score) + ":" + className;
+        textPrint += markString;
+        cv::putText(srcImage, markString, cv::Point(leftUpPoint.x, leftUpPoint.y + labelOffset),
+                    cv::FONT_HERSHEY_COMPLEX, fountScale, fountColor);
+    }
+    textPrint += "]";
+    if (displayMode == "imshow") {
+        cv::imshow("usb-show-demo", srcImage);
+        cv::waitKey(1);
+    } else if (displayMode == "stdout") {
+        cout<<"Detect Result: "<< textPrint <<endl;
+    } else {
+        LOG_PRINT("[ERROR] output display mode not supported.");
+    }
+    return;
+}
+
+void* GetInputVideo(void* arg) {
+    bool ret = SetCurContext(context);
+    CHECK_RET(ret, LOG_PRINT("[ERROR] set cur context for pthread  %ld failed.", pthread_self()); return NULL);
+    int32_t deviceId = *(int32_t *)arg;    
+    string videoPath = "../data/test.mp4";
+    VideoRead cap(videoPath, deviceId);
+    CHECK_RET(cap.IsOpened(), LOG_PRINT("[ERROR] open %s failed.", videoPath.c_str()); return NULL);
+
+    ImageProc imageProcess;
+    ImageData frame;
+    ImageSize modelSize(modelWidth, modelHeight);
+    int isHost = GetRunMode();
+    LOG_PRINT("[INFO] start to decode...");
+    while(1) {
+        ret = cap.Read(frame);
+        if (ret) {
+            ImageData dst;
+            imageProcess.Resize(frame, dst, modelSize, RESIZE_PROPORTIONAL_UPPER_LEFT);
+            MsgData msgData;
+            msgData.data = dst.data;
+            msgData.size = dst.size;
+            msgData.videoEnd = false;
+            cv::Mat yuyvImg(frame.height*1.5, frame.width, CV_8UC1);
+            if (isHost) {
+                    void* hostDataBuffer = CopyDataToHost(frame.data.get(), frame.size);
+                    memcpy(yuyvImg.data, (unsigned char*)hostDataBuffer, frame.size);
+                    FreeHostMem(hostDataBuffer);
+                    hostDataBuffer = nullptr;
+                } else {
+                    memcpy(yuyvImg.data, (unsigned char*)frame.data.get(), frame.size);
+                }
+            cv::cvtColor(yuyvImg, msgData.srcImg, cv::COLOR_YUV2RGB_NV21);
+            while (1) {
+                if (msgDataQueue.Push(msgData)) {
+                    break;
+                }
+                usleep(100);
+            }
+        } else {
+            LOG_PRINT("[INFO] frame read end.");
+            break;
+        }
+    }
+    cap.Release();
+    MsgData msgData;
+    msgData.videoEnd = true;
+    while (1) {
+        if (msgDataQueue.Push(msgData)) {
+            break;
+        }
+        usleep(100);
+    }
+    LOG_PRINT("[INFO] preprocess add end msgData. tid : %ld", pthread_self());
+    return NULL;
+}
+
+void* GetInput(void* arg) {
+    bool ret = SetCurContext(context);
+    CHECK_RET(ret, LOG_PRINT("[ERROR] set cur context for pthread  %ld failed.", pthread_self()); return NULL);
+    int32_t deviceId = *(int32_t *)arg;
+    string devPath = "/dev/video0";
+    CameraRead cap(devPath, deviceId);
+    CHECK_RET(cap.IsOpened(), LOG_PRINT("[ERROR] open %s failed.", devPath.c_str()); return NULL);
+    ImageProc imageProcess;
+    ImageData frame;
+    ImageSize modelSize(modelWidth, modelHeight);
+    LOG_PRINT("[INFO] start to decode...");
+    while(1) {
+        ret = cap.Read(frame);
+        if (ret) {
+            ImageData dst;
+            imageProcess.Resize(frame, dst, modelSize, RESIZE_PROPORTIONAL_UPPER_LEFT);
+            MsgData msgData;
+            msgData.data = dst.data;
+            msgData.size = dst.size;
+            msgData.videoEnd = false;
+            cv::Mat yuyvImg(frame.height, frame.width, CV_8UC2);
+            memcpy(yuyvImg.data, (unsigned char*)frame.data.get(), frame.size);
+            cv::cvtColor(yuyvImg, msgData.srcImg, cv::COLOR_YUV2BGR_YUYV);
+            while (1) {
+                if (msgDataQueue.Push(msgData)) {
+                    break;
+                }
+                usleep(100);
+            }
+        } else {
+            LOG_PRINT("[INFO] frame read end.");
+            break;
+        }
+    }
+    cap.Release();
+    MsgData msgData;
+    msgData.videoEnd = true;
+    while (1) {
+        if (msgDataQueue.Push(msgData)) {
+            break;
+        }
+        usleep(100);
+    }
+    LOG_PRINT("[INFO] preprocess add end msgData. tid : %ld", pthread_self());
+    return NULL;
+}
+ 
+void* ModelExecute(void* arg) {
+    bool ret = SetCurContext(context);
+    CHECK_RET(ret, LOG_PRINT("[ERROR] set cur context for pthread  %ld failed.", pthread_self()); return NULL);
+    ModelProc modelProcess;
+    string modelPath = "../model/yolov5s.om";
+    ret = modelProcess.Load(modelPath);
+    CHECK_RET(ret, LOG_PRINT("[ERROR] load model %s failed.", modelPath.c_str()); return NULL);
+    while(1) {
+        if(!msgDataQueue.Empty()) {
+            MsgData msgData = msgDataQueue.Pop();
+            if (msgData.videoEnd) {
+                break;
+            }
+            else {
+                ret = modelProcess.CreateInput(static_cast<void*>(msgData.data.get()), msgData.size);
+                CHECK_RET(ret, LOG_PRINT("[ERROR] Create model input failed."); break);
+                MsgOut msgOut;
+                msgOut.srcImg = msgData.srcImg;
+                msgOut.videoEnd = msgData.videoEnd;
+                modelProcess.Execute(msgOut.inferOutputs);
+                CHECK_RET(ret, LOG_PRINT("[ERROR] model execute failed."); break);
+                while (1) {
+                    if (msgOutQueue.Push(msgOut)) {
+                        break;
+                    }
+                    usleep(100);
+                }
+            }
+        }
+    }
+    modelProcess.DestroyResource();
+    MsgOut msgOut;
+    msgOut.videoEnd = true;
+    while (1) {
+        if (msgOutQueue.Push(msgOut)) {
+            break;
+        }
+        usleep(100);
+    }
+    LOG_PRINT("[INFO] infer msg end. tid : %ld", pthread_self());
+    return  NULL;
+}
+
+void* PostProcess(void* arg) {
+    while(1) {
+        if(!msgOutQueue.Empty()) {
+            MsgOut msgOut = msgOutQueue.Pop();
+            usleep(100);
+            if (msgOut.videoEnd) {
+                break;
+            }
+            GetResult(msgOut.inferOutputs, msgOut.srcImg, modelWidth, modelHeight);
+        }
+    }
+    LOG_PRINT("[INFO] *************** all get done ***************");
+    exitFlag = true;
+    return  NULL;
+}
+
+int main(int argc, char *argv[]) {
+//初始化资源
+    int32_t deviceId = 0;
+    AclLiteResource aclResource(deviceId);
+    bool ret = aclResource.Init();
+    CHECK_RET(ret, LOG_PRINT("[ERROR] InitACLResource failed."); return 1);
+    context = aclResource.GetContext();
+    ret = Initparam(argc, argv);
+    CHECK_RET(ret, LOG_PRINT("[ERROR] Initparam failed."); return 1);
+ 
+    pthread_t preTids, exeTids, posTids;
+    // run usb camera:
+    pthread_create(&preTids, NULL, GetInput, (void*)&deviceId);
+    // run mp4 video:
+    // pthread_create(&preTids, NULL, GetInputVideo, (void*)&deviceId);
+
+    pthread_create(&exeTids, NULL, ModelExecute, NULL);
+    pthread_create(&posTids, NULL, PostProcess, NULL);
+
+    pthread_detach(preTids);
+    pthread_detach(exeTids);
+    pthread_detach(posTids);
+ 
+    while(!exitFlag) {
+        sleep(10);
+    }
+    aclResource.Release();
+    return 0;
+}
