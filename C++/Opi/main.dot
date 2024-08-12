@@ -258,7 +258,7 @@ void* GetInputVideo(void* arg) {
     LOG_PRINT("[INFO] preprocess add end msgData. tid : %ld", pthread_self());
     return NULL;
 }
-//用于处理usb摄像头的输入给模型处理
+
 void* GetInput(void* arg) {
     bool ret = SetCurContext(context);
     CHECK_RET(ret, LOG_PRINT("[ERROR] set cur context for pthread  %ld failed.", pthread_self()); return NULL);
@@ -270,7 +270,6 @@ void* GetInput(void* arg) {
     ImageData frame;
     ImageSize modelSize(modelWidth, modelHeight);
     LOG_PRINT("[INFO] start to decode...");
-    //缩放摄像头输入,如果读取成功就持续处理,一旦没有处理到，就认为frame处理结束
     while(1) {
         ret = cap.Read(frame);
         if (ret) {
@@ -311,13 +310,10 @@ void* ModelExecute(void* arg) {
     //setcurcontext,为当前线程设置一个context
     bool ret = SetCurContext(context);
     CHECK_RET(ret, LOG_PRINT("[ERROR] set cur context for pthread  %ld failed.", pthread_self()); return NULL);
-    //创建一个ModelProc对象,用于进行模型管理
     ModelProc modelProcess;
-    //设置模型路径,加载模型
     string modelPath = "../model/yolov5s.om";
     ret = modelProcess.Load(modelPath);
     CHECK_RET(ret, LOG_PRINT("[ERROR] load model %s failed.", modelPath.c_str()); return NULL);
-
     while(1) {
         if(!msgDataQueue.Empty()) {
             MsgData msgData = msgDataQueue.Pop();
@@ -333,7 +329,7 @@ void* ModelExecute(void* arg) {
                 modelProcess.Execute(msgOut.inferOutputs);
                 CHECK_RET(ret, LOG_PRINT("[ERROR] model execute failed."); break);
                 while (1) {
-                    if (msgOutQueue.Push(msgOut)) { 
+                    if (msgOutQueue.Push(msgOut)) {
                         break;
                     }
                     usleep(100);
