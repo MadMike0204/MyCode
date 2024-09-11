@@ -18,14 +18,48 @@ private:
     LNode* GetElement(int i);// 查找第i个节点并返回指针
 public:
     LinkList();
+    ~LinkList();
     int ListInsert(int i,int e);
     int ListDelete(int i);
     int GetLength(); // 计算表长
     void HeadInitial(int n);
     void TailInitial(int n);
     void ListDisplay();
-    ~LinkList();
+    LinkList& MergeList(LinkList &another,bool flag);
 };
+LinkList& LinkList::MergeList(LinkList &another,bool flag=1) // 经过测试，只能正确合并递增序列
+{   // 0~递减序列 1~递增序列 还没实现
+    LinkList *result = new LinkList;
+    // 初始化指针，结果有序表指针初始化为头节点，this和another有序表初始化为第一个节点
+    LNode *pa = head->next;  // this有序表
+    LNode *pb = another.head->next; // another有序表
+    LNode *pc = result->head; //结果有序表
+    // 开始填充结果
+    while(pa && pb) 
+    {
+        if(pa->data <= pb->data) // 如果b链的数据大于等于a链，则存放b链的数据
+        {
+            pc->next = pa;
+            pa = pa->next;
+        }
+        else                     // 如果b链的数据小于 
+        {
+            pc->next = pb;
+            pb = pb->next;
+        }
+        pc = pc->next;           // result链指针后移
+    }
+    // 上面while循环的结果是其中一个链表到头了,为null
+    // 这段代码用来设置链表的尾节点
+    pc->next = pa ? pa : (pb?pb:NULL); 
+    // 逻辑说明:如果pa非NULL,则返回pa(pb肯定为null)
+    // 反过来说,如果pa为NULL,那么要判断一下pb是不是NULL再返回.
+    head->next = NULL; // this和another置空表
+    another.head->next = NULL; 
+    // 返回值为生成好的LinkList引用
+    return *result;
+}
+
 void LinkList::TailInitial(int n)
 {
     LNode* newNode,*tail = head;
@@ -138,9 +172,22 @@ void test2()
     jojo.TailInitial(5);
     jojo.ListDisplay();
 }
+void test3()//测试合并链表
+{
+    LinkList mergedList,a,b;
+    a.TailInitial(5);
+    b.TailInitial(5);
+    mergedList = a.MergeList(b);
+    cout << "合并后的链表长度为:" << mergedList.GetLength() << endl;
+    cout << "原链表清零检测: a:" << a.GetLength() << " b:" << b.GetLength() << endl;
+    cout << "以下为合并后的链表内容" << endl;
+    mergedList.ListDisplay();
+
+}
+
 int main(){
 
-    test2();
+    test3();
 
     return 0;
 }
