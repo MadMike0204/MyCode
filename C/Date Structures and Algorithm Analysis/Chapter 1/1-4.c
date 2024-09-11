@@ -11,8 +11,6 @@ void PrintOut(unsigned int N)
 }
 int main(){
 
-    PrintOut();
-
 
     return 0;
 }
