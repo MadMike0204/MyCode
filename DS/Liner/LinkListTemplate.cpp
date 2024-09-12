@@ -10,7 +10,7 @@ private:
     T data;
     LNode* next;
 public:
-    LNode(T e=0,LNode* pNext=NULL):next(pNext),data(e){}
+    LNode(T e=0,LNode* pNext=NULL):data(e),next(pNext){}
     ~LNode(){};
 };
 template<typename T>
@@ -28,38 +28,40 @@ public:
     void HeadInitial(int n);
     void TailInitial(int n);
     void ListDisplay();
-    LinkList<T>& MergeList(LinkList<T> &another);
+    LinkList<T>& MergeList(LinkList<T> &another,bool flag=1);
 };
 template<typename T>
-LinkList<T>& LinkList<T>::MergeList(LinkList<T> &another) // 经过测试，只能正确合并递增序列
-{   // 0~递减序列 1~递增序列 还没实现
+LinkList<T>& LinkList<T>::MergeList(LinkList<T> &another,bool flag) // 经过测试，只能正确合并递增序列
+{   // 0~递减序列 1~递增序列
     LinkList<T> *result = new LinkList<T>;
     // 初始化指针，结果有序表指针初始化为头节点，this和another有序表初始化为第一个节点
     LNode<T> *pa = head->next;  // this有序表
     LNode<T> *pb = another.head->next; // another有序表
     LNode<T> *pc = result->head; //结果有序表
+
     // 开始填充结果
-    while(pa && pb) 
+    // flag = 1和flag = 0 分别对应两种赋值情况，if合并了其中赋值同一个节点的value的情况。
+    while(pa && pb)
     {
-        if(pa->data <= pb->data) // 如果b链的数据大于等于a链，则存放b链的数据
+        if((flag && pa->data <= pb->data) || (!flag && pa->data >= pb->data)) 
         {
             pc->next = pa;
             pa = pa->next;
         }
-        else                     // 如果b链的数据小于 
+        else
         {
             pc->next = pb;
             pb = pb->next;
         }
         pc = pc->next;           // result链指针后移
     }
-    // 上面while循环的结果是其中一个链表到头了,为null
+    // 上面while循环的结果是其中一个链表到头了,为nullptr
     // 这段代码用来设置链表的尾节点
-    pc->next = pa ? pa : (pb?pb:NULL); 
-    // 逻辑说明:如果pa非NULL,则返回pa(pb肯定为null)
-    // 反过来说,如果pa为NULL,那么要判断一下pb是不是NULL再返回.
-    head->next = NULL; // this和another置空表
-    another.head->next = NULL; 
+    pc->next = pa ? pa : (pb?pb:nullptr); 
+    // 逻辑说明:如果pa非nullptr,则返回pa(pb肯定为nullptr)
+    // 反过来说,如果pa为nullptr,那么要判断一下pb是不是nullptr再返回.
+    head->next = nullptr; // this和another置空表
+    another.head->next = nullptr; 
     // 返回值为生成好的LinkList引用
     return *result;
 }
@@ -71,7 +73,7 @@ void LinkList<T>::TailInitial(int n)
     while(n--)
     {
         cin >> e;
-        newNode = new LNode(e);
+        newNode = new LNode<T>(e);
         tail->next = newNode;
         tail = tail->next;
     }
@@ -112,25 +114,29 @@ void LinkList<T>::ListDisplay()
 template<typename T>
 int LinkList<T>::ListDelete(int i)
 {
+    if(i<=0)// 不能删除头结点
+        return 0;
+
     LNode<T>* p = GetElement(i-1);
-    if(!p || !p->next)
+    //这个判断可以除去越界的节点，因为当i越界时，GetElement会返回空指针；而且不必遍历链表获取有效长度。
+    if(!p || !p->next)// 获得了空节点或者i-1节点的下一个节点是空的，说明节点无效
         return 0; // 表示删除失败
-    LNode<T>* temp = p->next->next;
-    delete p->next;
-    p->next = temp;
+    
+    LNode<T>* temp = p->next->next; // 保存要删除的节点的next指针
+    delete p->next;// 删除节点数据
+    p->next = temp;// 更新i-1节点的next指针
     return 1;
 }
 template<typename T>
 int LinkList<T>::GetLength()
 {
-    int l = -1;
-    LNode<T>* p;
-    for(p = head;p;)
+    int l = 0;
+    LNode<T>* p = head->next;
+    while(p)
     {
         l++;
         p = p->next;
     }
-
     return l;
 }
 template<typename T>
@@ -141,17 +147,17 @@ LinkList<T>::LinkList()
 template<typename T>
 LNode<T>* LinkList<T>::GetElement(int i) //返回第i个节点的指针
 {
+    if(i < 0)
+        return nullptr;
+
     LNode<T> *result = head;
     int k = 0;
-
-    if(i < 0)
-        return NULL;
-    while(i != k)   
+    while(result && k<i)   
     {
         result = result->next;
         k++;
     }
-    return result;
+    return result?result:nullptr; // 杜绝返回野指针的可能性?
 }
 template<typename T>
 int LinkList<T>::ListInsert(int i,T e) // 第i个位置插入e
@@ -180,15 +186,15 @@ void test1()
 
 void test2()
 {
-    LinkList<bool> jojo;
+    LinkList<double> jojo;
     jojo.TailInitial(5);
     jojo.ListDisplay();
 }
 void test3()//测试合并链表
 {
-    LinkList<int> mergedList,a,b;
-    a.TailInitial(5);
-    b.TailInitial(5);
+    LinkList<double> mergedList,a,b;
+    a.TailInitial(3);
+    b.TailInitial(3);
     mergedList = a.MergeList(b);
     cout << "合并后的链表长度为:" << mergedList.GetLength() << endl;
     cout << "原链表清零检测: a:" << a.GetLength() << " b:" << b.GetLength() << endl;

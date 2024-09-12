@@ -36,14 +36,15 @@ LinkList& LinkList::MergeList(LinkList &another,bool flag=1) // 经过测试，�
     LNode *pc = result->head; //结果有序表
 
     // 开始填充结果
-    while(pa && pb) 
+    // flag = 1和flag = 0 分别对应两种赋值情况，if合并了其中赋值同一个节点的value的情况。
+    while(pa && pb)
     {
-        if(pa->data <= pb->data) // 如果b链的数据大于等于a链，则存放b链的数据
+        if((flag && pa->data <= pb->data) || (!flag && pa->data >= pb->data)) 
         {
             pc->next = pa;
             pa = pa->next;
         }
-        else                     // 如果b链的数据小于 
+        else
         {
             pc->next = pb;
             pb = pb->next;
@@ -60,7 +61,6 @@ LinkList& LinkList::MergeList(LinkList &another,bool flag=1) // 经过测试，�
     // 返回值为生成好的LinkList引用
     return *result;
 }
-
 void LinkList::TailInitial(int n)
 {
     LNode* newNode,*tail = head;
@@ -180,7 +180,7 @@ void test3()//测试合并链表
     LinkList mergedList,a,b;
     a.TailInitial(5);
     b.TailInitial(5);
-    mergedList = a.MergeList(b);
+    mergedList = a.MergeList(b,0);
     cout << "合并后的链表长度为:" << mergedList.GetLength() << endl;
     cout << "原链表清零检测: a:" << a.GetLength() << " b:" << b.GetLength() << endl;
     cout << "以下为合并后的链表内容" << endl;
