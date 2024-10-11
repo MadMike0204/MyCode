@@ -2,13 +2,13 @@
 #include <math.h>
 int main(){
 
-    double R,Area;
+    float R,Area;
     int n;
-    double pi = 3.1415926;
+    float pi = 3.1415926;
 
-    scanf("%lf,%d",&R,&n);
-    Area = (0.5) * n * R * R * sin(2 * pi / n);
-    printf("Area=%.2lf\n",Area);
+    scanf("%f,%d",&R,&n);
+    Area = n * R * R * sin(2 * pi / n)/2;
+    printf("Area=%.2f\n",Area);
 
     return 0;
 }
