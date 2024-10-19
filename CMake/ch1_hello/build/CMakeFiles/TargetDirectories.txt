@@ -1,0 +1,3 @@
+F:/------------------OWN/VSCode/CMake/ch1_hello/build/CMakeFiles/Hello.dir
+F:/------------------OWN/VSCode/CMake/ch1_hello/build/CMakeFiles/ALL_BUILD.dir
+F:/------------------OWN/VSCode/CMake/ch1_hello/build/CMakeFiles/ZERO_CHECK.dir
