@@ -2,35 +2,37 @@
 using namespace std;
 class BinaryTree;
 
-class BinaryTreeNode // *LeftChild | Data | *RightChild
+class BinaryTreeNode //二叉树节点定义 *LeftChild | Data | *RightChild
 {
     private:
-        char data; // 节点数据
-        BinaryTreeNode* leftChild,*rightChild; 
+        char data; // 存放节点数据
+        BinaryTreeNode* leftChild,*rightChild;// 左子树和右子树
     public:
-        BinaryTreeNode(char e='\0',BinaryTreeNode *l=nullptr,BinaryTreeNode *r=nullptr);
-        char GetNode();
-        BinaryTreeNode *GetLeftChild();
-        BinaryTreeNode *GetRightChild();
-        void SetLeftChild(BinaryTreeNode *l);
-        void SetRightChild(BinaryTreeNode *r);
+        BinaryTreeNode(char e='\0',BinaryTreeNode *l=nullptr,BinaryTreeNode *r=nullptr); // 初始化节点
+        char GetNode(); // 获取节点数据
+        BinaryTreeNode *GetLeftChild(); // 获取指向左子树的指针
+        BinaryTreeNode *GetRightChild(); // 获取指向右子树的指针
+        void SetLeftChild(BinaryTreeNode *l); // 设置指向左子树的指针
+        void SetRightChild(BinaryTreeNode *r); // 设置指向右子树的指针
 };
-class BinaryTree
+
+class BinaryTree // 二叉树定义
 {
-    void friend CreateMyBT(BinaryTree &tree);
     private:
-        BinaryTreeNode* root;
-        BinaryTreeNode *CreateBinaryTree(string s,int &i);
-        void PreorderTraverse(BinaryTreeNode* t);
-        void PostorderTraverse(BinaryTreeNode* t);
-        void InorderTraverse(BinaryTreeNode* t);
+        BinaryTreeNode* root; // 二叉树树根
+        // 输入实例: AB#C##D##
+        BinaryTreeNode *CreateBinaryTreeAccordingToPreorderString(string s,int &i); // 根据 先序 递归创建二叉树
+        void PreorderTraverse(BinaryTreeNode* t);  // 先序 输出二叉树
+        void PostorderTraverse(BinaryTreeNode* t); // 后序 输出二叉树
+        void InorderTraverse(BinaryTreeNode* t);   // 中序 输出二叉树
     public:
         BinaryTree();// 置空树
-        void CreateBinaryTreeAccordingToPreorderString(string s);
-        void PreorderTraverse();
-        void PostorderTraverse();
-        void InorderTraverse();
+        void CreateBinaryTreeAccordingToPreorderString(string s); // 根据先序字符串创建二叉树 入口
+        void PreorderTraverse(); // 先序 输出二叉树 入口
+        void PostorderTraverse();// 后序 输出二叉树 入口
+        void InorderTraverse();  // 中序 输出二叉树 入口
 };
+
 // --- BinaryTreeNode类的方法实现
 BinaryTreeNode::BinaryTreeNode(char e,BinaryTreeNode* l,BinaryTreeNode* r):
     data(e),leftChild(l),rightChild(r)
@@ -55,6 +57,7 @@ void BinaryTreeNode::SetRightChild(BinaryTreeNode* r)
 {
     rightChild = r;
 }
+
 // --- BinaryTree类的方法实现
 BinaryTree::BinaryTree()
 {
@@ -109,16 +112,16 @@ void BinaryTree::PostorderTraverse()
 void BinaryTree::CreateBinaryTreeAccordingToPreorderString(string s)
 {
     int i=0;
-    root = CreateBinaryTree(s,i);
+    root = CreateBinaryTreeAccordingToPreorderString(s,i);
 }
-BinaryTreeNode *BinaryTree::CreateBinaryTree(string s,int &i)
+BinaryTreeNode *BinaryTree::CreateBinaryTreeAccordingToPreorderString(string s,int &i)
 {
     BinaryTreeNode* T = nullptr;
     if(s[i] != '#') 
     {
         T = new BinaryTreeNode(s[i]);
-        T->SetLeftChild(CreateBinaryTree(s,++i));
-        T->SetRightChild(CreateBinaryTree(s,++i));
+        T->SetLeftChild(CreateBinaryTreeAccordingToPreorderString(s,++i));
+        T->SetRightChild(CreateBinaryTreeAccordingToPreorderString(s,++i));
     }
     return T;
 }
