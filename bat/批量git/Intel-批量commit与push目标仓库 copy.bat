@@ -2,7 +2,7 @@
 @echo off
 :: 设置Git仓库路径，多个路径之间用空格分隔
 set repos=F:\------------------OWN\IDEA\MyJava F:\------------------OWN\VSCode F:\------------------OWN\ObisidianGit
-
+cd /d F:
 :: 远程仓库名称 (例如：origin)
 set remote=origin
 
