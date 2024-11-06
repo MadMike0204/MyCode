@@ -14,8 +14,6 @@ class ArcNode
     public:
         ArcNode(int n = -1,int w = 0,ArcNode* nA = nullptr): // 网生成
             adjcentVertex(n),weight(w),nextArc(nA){}
-        ArcNode(int n = -1,ArcNode* nA = nullptr): // 图生成
-            adjcentVertex(n),nextArc(nA){}
 };
 class VertexNode
 {
@@ -26,18 +24,21 @@ class VertexNode
     public:
         VertexNode(string d = "",ArcNode* hA = nullptr):
             vertex(d),headArc(hA){}
-        ArcNode* getLastArc()
+        ArcNode* getNewArc()
         {
             ArcNode* currentArc = headArc;
-            while(currentArc->nextArc != nullptr)
+            while(true)
             {
+                if(currentArc == nullptr)
+                    break;
                 currentArc = currentArc->nextArc;
             }
+            currentArc = new ArcNode();
             return currentArc;
         }
         void addAdjcentVertex(int index)
         {
-            ArcNode* a = getLastArc();
+            ArcNode* a = getNewArc();
             a->adjcentVertex = index;
         }
 };
@@ -47,15 +48,23 @@ class Graph
         VertexNode nodes[MAXNODE];
         int nodeNum;
         int arcNum;
-        int graphKind; // 'U' = graph 'D' = digraph
+        char graphKind; // 'U' = graph 'D' = digraph
         int getVertexIndexByName(string);
     public:
-        Graph(int nN = 0,int aN = 0,int gK = 0):
+        Graph(int nN = 0,int aN = 0,char gK = 0):
             nodeNum(nN),arcNum(aN),graphKind(gK){}
         int initGraph();
         void initVertexes();
         void initArcs();
+        void printGraph();
 };
+void Graph::printGraph()
+{
+    for(int i=0;i<nodeNum;i++)
+    {
+        cout << nodes[i].vertex << " ";
+    }
+}
 int Graph::getVertexIndexByName(string v)
 {
     for(int i=0;i<nodeNum;++i)
@@ -67,11 +76,9 @@ int Graph::getVertexIndexByName(string v)
 }
 int Graph::initGraph()
 {
-    cin >> graphKind;
-    cin >> nodeNum;
     initVertexes();
-    cin >> arcNum;
     initArcs();
+    return 1;
 }
 void Graph::initVertexes()
 {
@@ -89,6 +96,21 @@ void Graph::initArcs()
         cin >> vertexFormer >> vertexLater;
         int indexFormer = getVertexIndexByName(vertexFormer);
         int indexLater = getVertexIndexByName(vertexLater);
-        
+        nodes[indexFormer].addAdjcentVertex(indexLater);
     }
+}
+
+void test()
+{
+    int nodeNum = 5,arcNum = 7,graphKind = 1;
+    Graph jojo(nodeNum,arcNum,graphKind);
+    jojo.initGraph();
+    jojo.printGraph();
+}
+
+int main(){
+
+    test();
+
+    return 0;
 }
