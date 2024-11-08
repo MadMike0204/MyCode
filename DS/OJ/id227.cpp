@@ -1,4 +1,5 @@
 #include<iostream>
+#include<queue>
 using namespace std;
 #define MAXNODE 20
 class Graph;
@@ -35,38 +36,44 @@ class Graph
         char graphKind; // 'U' = graph 'D' = digraph
         int getVertexIndexByName(string);
         int** adjacencyMatrix;
-        void DFS(int index,int met[]);
     public:
         Graph(int nN = 0,int aN = 0,char gK = 0):
             nodeNum(nN),arcNum(aN),graphKind(gK){}
         void printAdjacencyMatrix();
         void initGraphByAdjacencyMatrix(int nodeNum);
-        void DFS();
+   
+        void BFS();
 };
-void Graph::DFS()
+void Graph::BFS()
 {
     int met[nodeNum] = {0};
-    for(int i=0;i<nodeNum;i++)
+    queue<int> q;
+
+    for(int i = 0;i < nodeNum;i++)
     {
-        if(met[i] == 0)
+        if(met[i] == 0) // 用外循环检查非连通图的孤立结点
         {
-            DFS(i,met);
+            q.push(i);
+            met[i] = 1;
+
+            while(!q.empty()) // 重复的队列操作 
+            {
+                int currentNode = q.front(); // 队首出队，打印，表示遍历到
+                q.pop();
+                cout << currentNode << " ";
+                        // 找当前遍历到的节点的相关节点，让他们入队
+                for(int j = 0;j < nodeNum;j++) 
+                {
+                    if(adjacencyMatrix[currentNode][j] == 1 && met[j] == 0)
+                    {
+                        q.push(j);
+                        met[j] = 1;
+                    }
+                }
+            }
         }
     }
     cout << endl;
-}
-void Graph::DFS(int index,int met[])
-{
-    met[index] = 1;
-    cout << index << " ";
-    for(int i=0;i<nodeNum;i++)
-    {
-        if(adjacencyMatrix[index][i] == 1 && met[i] == 0)
-        {
-            if(met[i] == 0)
-                DFS(i,met);
-        }
-    }
 }
 
 void Graph::initGraphByAdjacencyMatrix(int nodeNum)
@@ -107,7 +114,7 @@ int main(){
         cin >> node;
         Graph jojo;
         jojo.initGraphByAdjacencyMatrix(node);
-        jojo.DFS();
+        jojo.BFS();
     }
 
     return 0;
