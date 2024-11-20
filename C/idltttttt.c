@@ -2,15 +2,11 @@
 #include<math.h>
 int main(){
 
-    float h,b,c,d,i,x,y;
-    scanf("%f",&h);
-    int n;
-    scanf("%d",&n);
-    while(n--){
-        
-        b = pow(0.5,n);
-        c = b * h;
-
+    int length = 5;
+    int arr[length];
+    for(int i=0;i<length;i++)
+    {
+        scanf("%d",&arr[i]);
     }
 
     return 0;
