@@ -3,10 +3,11 @@
   flag作用：如果进行了一次排序，那么这次for循环结束后会继续进行一次，否则就结束（排好了）
   较小的元素像是气泡般慢慢「浮」到数列的顶端，故叫做冒泡排序。
 */
+
 void bubble_sort(int t,int arr[])
 {
     int temp;
-    int flag = true;
+    int flag = 1;
     while(flag)
     {
         flag = 0;
