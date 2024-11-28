@@ -1,0 +1,14 @@
+2024.11.26 20:56:54 INFO  Started: Metals version 1.4.1 in folders 'F:\------------------OWN\VSCode' for client Visual Studio Code 1.94.2.
+2024.11.26 20:56:54 WARN  Flyway upgrade recommended: H2 2.3.232 is newer than this version of Flyway and support has not been tested. The latest supported version of H2 is 2.2.224.
+2024.11.26 20:56:54 WARN  no build tool detected in workspace 'F:\------------------OWN\VSCode'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
+2024.11.26 20:56:54 WARN  Build server is not auto-connectable.
+2024.11.27 22:29:26 INFO  Shutting down server
+2024.11.27 22:29:26 INFO  shutting down Metals
+2024.11.27 22:29:26 INFO  Exiting server
+2024.11.27 22:30:10 INFO  Started: Metals version 1.4.1 in folders 'F:\------------------OWN\VSCode' for client Visual Studio Code 1.94.2.
+2024.11.27 22:30:11 WARN  Flyway upgrade recommended: H2 2.3.232 is newer than this version of Flyway and support has not been tested. The latest supported version of H2 is 2.2.224.
+2024.11.27 22:30:11 WARN  no build tool detected in workspace 'F:\------------------OWN\VSCode'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. 
+2024.11.27 22:30:11 WARN  Build server is not auto-connectable.
+2024.11.28 14:49:43 INFO  Shutting down server
+2024.11.28 14:49:43 INFO  shutting down Metals
+2024.11.28 14:49:43 INFO  Exiting server
