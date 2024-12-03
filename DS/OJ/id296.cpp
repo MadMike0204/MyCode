@@ -31,6 +31,7 @@ void SSTable::initSStable(){
     }
     length = n;
 }
+
 int SSTable::binarySearchElementByKey(int key){
     // 初始化折半查找的上下界和中点
     int high = length;
@@ -47,7 +48,6 @@ int SSTable::binarySearchElementByKey(int key){
         else if(key > element[mid])
             low = mid + 1;
     }
-
 }
 
 int main(){
