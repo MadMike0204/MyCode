@@ -1,30 +1,22 @@
 #include<stdio.h>
-int main(){
-int N,i,j,m,Xi,Yj,p,t,k;
-    scanf("%d",&N);
-    int magic[N][N]={0};
-    m=N*N;
-    i=0;
-    j=(N-1)/2;//确定第一个数字的位置
-	for(k=1;k<=m;k++){
-	   magic[i][j]=k;//判断右上方数字的位置  
-	   Xi=(i-1+N)%N;//防止i-1的时候小于零而越界 
-	   Yj=(j+1)%N;//防止j+1超过N-1而越界 
-	   if(magic[Xi][Yj]==0){//右上方无值
-	    i=Xi;
-		j=Yj;
-		}  
-		else//右上方有值，填在正下方
-		i=(i+1)%N;//防止超过N-1而越界 
+int isprime(int x){
+	for(int i=2;i<x;i++){
+		if(x%i==0){
+			return 0;
+		}
+	}
+	return 1;
 }
-	for(t=0;t<N;t++){
-		for(p=0;p<N;p++){
-			printf("%d",magic[t][p]);
-			if(p!=N-1){
-			printf(" ");
-		    }
-			else
-			printf("\n");
-			}
-		}	return 0;
+int main()
+{
+	int m,n;//输入2 3 输入3 9 
+	int sum=0;
+	scanf("%d%d",&m,&n);
+	for(int i=m;i<=n;i++){
+		if(isprime(i)){
+			sum+=i;
+		}
+	}
+	printf("%d",sum);//输出5 输出15
+	return 0;
 }
