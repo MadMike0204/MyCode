@@ -1,58 +1,52 @@
 #include<stdio.h>
 
-struct NUM
-{
-    int flag;
-    int value;
-};
-
-static struct NUM arr[99];
-
-int PartialSum(const int n,const int k,const int position)
-{
-    int i,x;
-    for(i=0;i<n;i++)
+int a[100],k,n;
+int path[100];
+int pathLength;
+//已经从前i项得到了和sum，i项之后的分支 
+int dfs(int i,int sum){
+    //如果前n项都计算过了，则返回sum是否与k相等 
+    if(i==n) 
+        return (sum == k);
+    //不加上a[i]的情况 
+    if(dfs(i+1,sum)) 
+        return 1;
+    //加上a[i]的情况 
+    if(dfs(i+1,sum+a[i])) 
     {
-        x = k - arr[i].value;
-        if(x == 0)
-        {
-            arr[i].flag = 1;
-            return 1;
-        }
-        else if(i == (n-1))
-        {
-            return 0;
-        }
+        path[pathLength++] = a[i];
+        return 1;
     }
-}
-int main(){
+    //加不加a[i]，都被无法与k相等，则返回false 
+    //回溯 移除当前元素
+    if(pathLength > 0)
+        pathLength--;
+    return 0;
+} 
 
-    int t,n,k,x;
+int main(){
+    int t;
     scanf("%d",&t);
-    while(t>0)
-    {
-        scanf("%d %d",&n,&k);
-        int i;
-        for(i=0;i<n;i++)
-        {
-            scanf("%d",arr[i].value);
+
+    while(t--){
+        scanf("%d",&n);
+        scanf("%d",&k);
+        for(int i=0;i<n;i++){
+            scanf("%d",&a[i]);
         }
-        x = PartialSum(n,k,0);
-        if(x == 0)
-        {
-            printf("NO");
-        }
-        else
-        {
-            for(i=0;i<99;i++)
+
+        pathLength = 0;
+        if(dfs(0,0)){
+            printf("Yes\n");
+            for(int i=pathLength-1;i>=0;i--)
             {
-                if(arr[i].flag == 1)
-                {
-                    printf("%d",arr[i].value);
-                }
+                printf(i==pathLength-1?"%d":" %d",path[i]);
             }
+            printf("\n");
         }
-        t--;
+        else{
+            printf("No\n");
+        }
     }
 
     return 0;

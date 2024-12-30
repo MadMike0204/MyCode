@@ -19,80 +19,69 @@
 */
 #include<string.h>
 #include<stdio.h>
+#include<math.h>
 
-static int Short_Num[6];
+static int first3[18] = { // 存放合法的前三位
+    130,131,132,133,134,135,136,137,138,
+    153,155,156,
+    180,181,182,183,184,189
+};
 
-int ShortNum(const char str[]);
+int ShortNum(const char str[],int result[6]);
 
 int main(){
 
-    char str[13];
-    memset(str,0,sizeof(str));
+    char str[13]; // 存放手机号
     int t,i,len;
     scanf("%d",&t);
-    while(t>0)
+    int result[6];
+    while(t--)
     {
         scanf("%s",str);
-        len = strlen(str);
-        if(ShortNum(str) && len == 11)
-        {
-            for(i=0;i<6;i++)
-            {
-                printf("%d",Short_Num[i]);
+        len = strlen(str); // 获取字符串长度
+
+        // 判断手机号是否合法
+        if(ShortNum(str,result) && len == 11){ 
+            
+            for(i=0;i<6;i++){
+                printf("%d",result[i]);
             }
             printf("\n");
         }
-        else
-        {
+        else{
             printf("error\n");
         }
-        t--;
     }
-
     return 0;
 }
 
-int ShortNum(const char str[])
-{
-    int Head[3],head,flag = 0;
+int ShortNum(const char str[],int result[6])
+{   
+    int head = 0;
     int i;
-    for(i=0;i<3;i++)
-    {
-        Head[i] = str[i] - '0';
+
+    // 将前三位变成int类型三位数 与我们设置的静态变量一致
+    for(i=0;i<3;i++){
+        head += (str[i] - '0') * (int)pow(10,2-i);
     }
-    head = Head[0] * 100 + Head[1] * 10 + Head[2];
-    switch(head)
-    {
-        case 133:
-        case 153:
-        case 180:
-        case 181:
-        case 189:
-        case 130:
-        case 131:
-        case 132:
-        case 155:
-        case 156:
-        case 134:
-        case 135:
-        case 136:
-        case 137:
-        case 138:
-        case 182:
-        case 184:
-        case 183:
+    // 判断是否合法 由于数据比较少 遍历搜索就行
+    int flag = 0; // 是否找到
+    for(int i=0;i<18;i++){
+        if(head == first3[i]){
             flag = 1;
-            break;
+            break; // 提前结束
+        }
     }
+    // 如果合法 就计算短号
     if(flag)
     {
-        Short_Num[0] = 6;
+        result[0] = 6;
         for(i=1;i<6;i++)
         {
-            Short_Num[i] = str[i+5] - '0';
+            result[i] = str[i+5] - '0';
         }
         return 1;
     }
-    else   
-        return 0;
+    // 不合法退出
+    return 0;
 }
