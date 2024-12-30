@@ -15,18 +15,24 @@ int main()
 {
 	int n;
 	scanf("%d",&n);
+    // getchar();
+
 	while(n--)
 	{
 		char str1[40],str2[40];
 		int index;
+
 		scanf("%s",str1);
+
+
 		int k;
-		for(k=0;;k++)//k是长度 
+		for(k=0;;k++)
 		{
-			if(str1[k]=='\0')
+			if(str1[k]=='\n')
 			break;
 		}
 		scanf("%d",&index);
+
 		int c=Substring(str1,str2,index,k);
 		if(c==0)
 		printf("IndexError\n");
