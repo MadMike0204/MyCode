@@ -1,12 +1,9 @@
 #include <stdio.h>
 int main(){
-
-    int x;
-    char jojo[2333];
-
-    scanf("%s",jojo);
-    scanf("%d",&x);
-    
-
+    int a,b,c;
+    scanf("%d %d %d",&a,&b,&c);
+    int x = a * b * c;
+    int y =2 * (a*b + b*c + a*c);
+    printf("V=%d\nS=%d\n",x,y);
     return 0;
 }
