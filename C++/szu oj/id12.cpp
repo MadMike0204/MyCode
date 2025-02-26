@@ -3,11 +3,16 @@ using namespace std;
 int main(){
 
     int t,N,M;
-    static int arr[45][45];
     cin >> t;
+    int** arr;
     while(t>0)
     {
         cin >> N >> M;
+        arr = new int*[N];
+        for(int i=0;i<M;i++){
+            arr[i] = new int[M];
+        }
+
         int i,j;
         for(i=0;i<N;i++)
         {
