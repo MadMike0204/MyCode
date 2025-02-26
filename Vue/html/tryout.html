@@ -13,14 +13,44 @@
         <link rel="stylesheet" href="">
     </head>
     <body>
-        <!--[if lt IE 7]>
-            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
-        <h1><p>Test Infomation</p></h1>
+        <button onclick="getElementById('demo').innerHTML=Date()">
+            这是一个按钮
+        </button>
+        <p id="demo"></p>
+        <!-- <h1><p>Test Infomation</p></h1>
         <b><i>粗体和斜体文本</i></b>
-        <script src="" async defer></script>
-        <script>
-            alert("JOJJO")
-        </script>
+        <script src="" async defer></script> -->
     </body>
+    <script>
+        var a = 23333.3
+        var a = 999
+        var str = "test string"
+        var nullp = undefined
+        var arr = [1,2,3,4,5,6]
+        function testfunc(x,y){
+            return x/y;
+        }
+        var obj = new Object()
+        
+        str = obj.toLocaleString();
+        //document.write(a)
+        //document.write(testfunc(1,6));
+        //document.write(obj.valueOf());
+        // var obj = {
+        //     length: 25,
+        //     name: "Test obj",
+        //     info: function(){
+        //         console.log("OBJ info:"+this.name+"'s length "+length);
+        //     }
+        // };
+        // var声明的变量和直接赋值的未定义变量
+        document.write(window.testvar+"\n");
+        function tt(){
+            testvar = "warning\n";
+        }
+        tt();
+        document.write("testvar\n");
+
+    </script>
 </html>
+
