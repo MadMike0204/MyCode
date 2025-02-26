@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<meta charset="utf-8">
+<title>Playground</title>
+</head>
+
+<body>
+    <h3>试输入电子邮箱</h3>
+    <input id="email" type="text" required>
+    <button onclick="testEmail()">验证电子邮箱是否合法</button>
+</body>
+
+<script>
+    function testEmail(){
+        var inputEmail = new String(document.getElementById("email"));
+        atPos = inputEmail.indexOf('@');
+        pointPos = inputEmail.indexOf('.');
+        if (atPos > 0 && pointPos - atPos > 0){
+
+        }
+    }
+
+    // let emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+</script>
+</html>
