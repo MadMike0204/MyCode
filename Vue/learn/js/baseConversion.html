@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+<title>10进制双精度浮点数转64进制</title>
+</head>
+
+<body>
+<h1>进制转换</h1>
+</body>
+
+<script>
+
+function double2Base64(num = 0){
+    if(num === 0){
+        return '0'
+    }
+    const numInteger = Math.floor(num)
+    const numDecimal = num - numInteger
+
+    let integers = []
+    if(numInteger === 0){
+        integers = ['0']
+    }else{
+        let integerVal = numInteger
+        while(integerVal !== 1){
+            integers.push(integerVal % 2 === 0?'0':'1')
+            integerVal = Math.floor(integerVal/2)
+        }
+        integers.push('1')
+    }
+    const resInteger = integers.reverse().join('')
+
+    let decimals = []
+    if(numDecimal){
+        let decimalVal = numDecimal
+        // 最多取49位 ?
+        let count = 49
+        while(decimalVal !== 1 && count > 0){
+            decimalVal = decimalVal * 2
+            if(decimalVal >= 1){
+                decimals.push('1')
+                if(decimalVal > 1){
+                    decimalVal = decimalVal - 1
+                }
+            } else{
+                decimals.push('0')
+            }
+        }
+    }
+
+    const base64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/"
+    var numBase32 =num.toString(32)
+    let numBase64
+    while(num){
+        numBase64 = base64.charAt(numBase32 % 32) + numBase64
+        num = Math.floor(num/32)
+    }
+    return numBase64
+}
+var num = 114
+document.writeln(double2Base64(num))
+    
+</script>
+
+</html>
