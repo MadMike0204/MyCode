@@ -96,7 +96,17 @@
     // document.writeln(`x:${x} y:${y} z:${z} w:${w}`);
     document.writeln(String(Date()));
     document.writeln(String(jo));
-    document.writeln(String())
+    document.writeln(String());
+
+    var obj1 = { // 创建一个新对象
+        a: 1,
+        name:"name"
+    };
+    var obj2 = new Object(obj1); // 一个对象 参数为obj1
+    var obj3 = Object(obj1); // 不进行转换 直接返回一致的玩意
+    obj1.a = 2; // 修改obj1.a 由于3个obj都指向同一个地址，所以共用数据
+    console.log(obj1,obj2,obj3);
+    console.dir(obj1);
 </script>
 
 </html>
