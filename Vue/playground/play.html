@@ -9,7 +9,7 @@
 <body>
 <h1>标题</h1>
 <p>段落</p>
-<p id="text"></p>
+<p id="text">哇袄</p>
 </body>
 
 <script>
@@ -107,9 +107,17 @@
     // obj1.a = 2; // 修改obj1.a 由于3个obj都指向同一个地址，所以共用数据
     // console.log(obj1,obj2,obj3);
     // console.dir(obj1);
-    var bigN = 210000 * 10000  * 1000 * 8.2;
-    document.writeln(bigN.toFixed(2));
-
+    // var bigN = 210000 * 10000  * 1000 * 8.2;
+    // document.writeln(bigN.toFixed(2));
+    const data = {};
+    const element = document.getElementById('text');
+    data[element] = 'metadata';
+    data['[object HTMLDivElement]'] = "jojo"; //?
+    console.log(data);
+    
+    const m = new Map();
+    const o = {p:'Hello World'};
+    m.set(o,'content');
 </script>
 
 </html>
