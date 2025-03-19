@@ -30,7 +30,7 @@ int main(){
         t--;
         if(t != 0)
         {
-            printf("\n");
+            cout << endl;
         }
     }
 
@@ -51,9 +51,12 @@ void Printl(PP &pos)
     cout << "Name: " << pos.name << endl
          << "Terminal: " << pos.terminal << " operator: " << pos.oprt << endl
          << "Card Issuers: " << pos.Issuer << " Validity: " << pos.validity << endl
-         << "Card Number: " << pos.cardnumber[0] << pos.cardnumber[1] << pos.cardnumber[2] << pos.cardnumber[3] << "********"
-         << pos.cardnumber[12] << pos.cardnumber[13] << pos.cardnumber[14] << pos.cardnumber[15] << endl
+         << "Card Number: " << pos.cardnumber[0] 
+         << pos.cardnumber[1] << pos.cardnumber[2] 
+         << pos.cardnumber[3] << "********"
+         << pos.cardnumber[12] << pos.cardnumber[13] 
+         << pos.cardnumber[14] << pos.cardnumber[15] << endl
          << "Traded: " << pos.time << endl
-         <<"Costs: $";
-    printf("%.2lf\n",pos.costs);
+         << "Costs: $";
+    cout << fixed << setprecision(2) << pos.costs << endl;
 }
