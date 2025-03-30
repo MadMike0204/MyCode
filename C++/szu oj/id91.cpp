@@ -17,19 +17,19 @@ class CTriangle{
             {
                 type = "no triangle";
             }
+            else if((arr[0] == arr[1] || arr[0] == arr[2] || arr[1] == arr[2]) && arr[0] * arr[0] + arr[1] * arr[1] == arr[2] * arr[2])
+            {
+                type = "isosceles right triangle";
+            }
             else if(arr[0] == arr[1] && arr[1] != arr[2] && arr[0]*arr[0] + arr[1] * arr[1] != arr[2] * arr[2])
             {
                 type = "isosceles triangle";
-            }
-            else if(arr[0] == arr[1] && arr[1] != arr[2] && arr[0]*arr[0] + arr[1] * arr[1] == arr[2] * arr[2])
-            {
-                type = "isosceles right triangle";
             }
             else if(arr[0] == arr[1] && arr[1] == arr[2])
             {
                 type = "equilateral triangle";
             }
-            else if(arr[0]*arr[0] + arr[1] * arr[1] != arr[2] * arr[2])
+            else if(arr[0]*arr[0] + arr[1] * arr[1] == arr[2] * arr[2])
             {
                 type = "right triangle";
             }
@@ -61,9 +61,9 @@ int  main()
 {
     int t;
     cin >> t;
-    while(t>0)
+    double a,b,c;
+    while(t--)
     {   
-        int a,b,c;
         cin >> a >> b >> c;
         CTriangle tri(a,b,c);
         if(tri.type != "no triangle")
@@ -71,7 +71,6 @@ int  main()
             cout << ", " << fixed << setprecision(1) << tri.SSS();
         }
         cout << endl;
-        t--;
     }
     return 0;
 }

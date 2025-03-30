@@ -91,7 +91,7 @@ int main(){
                 }
             }
         }
-        cout << fixed << setprecision(2) << "The longeset distance is " << distance;
+        cout << fixed << setprecision(2) << "The longest distance is " << distance;
         cout << ",between p[" << p_1 << "]" << " and p[" << p_2 << "]." << endl;
         t--;
     }
