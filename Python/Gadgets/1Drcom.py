@@ -28,8 +28,8 @@ def login_to_campus_network():
     password_field = driver.find_element(By.XPATH, "//*[@id='edit_body']/div[3]/div[1]/div/div[2]/div[1]/div/form/input[4]")  
     
     # 输入账号和密码
-    username_field.send_keys("455399")  # 输入你的账号
-    password_field.send_keys("ktq041226")  # 输入你的密码
+    username_field.send_keys("-")  # 输入你的账号
+    password_field.send_keys("-")  # 输入你的密码
     
     # 找到并勾选同意免责条款和记住密码选项
     agreement_checkbox = driver.find_element(By.NAME, "C1")  # 根据checkbox的name属性定位
