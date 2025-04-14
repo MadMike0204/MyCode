@@ -24,6 +24,9 @@ int main()
     struct sockaddr_in serv_addr;
     char buffer[BUFFER_SIZE] = {0};
 
+    // 创建下载目录
+    system("mkdir download 2> nul");  // On Windows, 2> nul suppresses errors if directory exists
+
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         perror("Socket creation error");
@@ -53,10 +56,6 @@ int main()
 
     // 视频文件名
     char req[REQUEST_SIZE] = "ocean-480p-2500k.mp4";
-    /******************************************************************/
-    /***************** 任务2：如何按顺序选择视频文件？*****************/
-    /******************************************************************/
-
     bytes_sent = send(sock, req, REQUEST_SIZE, 0);
     if (bytes_sent < 0)
         printf("ERROR in send\n");
@@ -73,64 +72,76 @@ int main()
     file_size = ntohl(file_size_buf);
     printf("file_size %d \n", file_size);
 
-    // 接收视频片段
-    char *video_segement = malloc(file_size);
-    if (video_segement == NULL)
+    // 准备文件路径
+    char file_path[40] = DOWNLOAD_PATH;
+    strcat(file_path, req);
+    printf("Saving to: %s\n", file_path);
+    
+    // 打开文件准备写入
+    FILE *fp = fopen(file_path, "wb");
+    if (fp == NULL)
     {
-        perror("malloc failed");
-        // 处理内存分配失败的情况，可能需要退出程序
+        perror("Failed to open file for writing");
+        closesocket(sock);
+        WSACleanup();
         return -1;
     }
 
+    // 接收视频片段
     int recv_count = 0;
-    char* video_buffer = malloc(BUFFER_SIZE);
+    char buffer_recv[BUFFER_SIZE] = {0};
+
     while (recv_count < file_size)
     {
-        int byte_received = recv(sock,video_buffer,BUFFER_SIZE,0);
-        if(byte_received < 0){
-            perror("Error occurred.");
+        int bytes_received = recv(sock, buffer_recv, BUFFER_SIZE, 0);
+        if (bytes_received <= 0)
+        {
+            perror("Error receiving data");
+            break;
         }
-        memcpy(video_segement + recv_count, video_buffer, byte_received);
-        recv_count += byte_received;
-        /************************************************************************/
-        /***************** 任务3 ： 如何使用buffer接收视频文件？*****************/
-        /************************************************************************/
+        
+        // 写入文件
+        size_t bytes_written = fwrite(buffer_recv, 1, bytes_received, fp);
+        if (bytes_written < bytes_received)
+        {
+            perror("Failed to write all data to file");
+            break;
+        }
+        
+        recv_count += bytes_received;
+        printf("\rReceived: %d/%d bytes (%.2f%%)", 
+               recv_count, file_size, 
+               (float)recv_count / file_size * 100);
+        fflush(stdout);
     }
+    printf("\nReceive completed!\n");
 
+    // 关闭文件
+    fclose(fp);
+
+    // 检查文件结束符
     unsigned char r_stop_byte;
     if (recv(sock, &r_stop_byte, 1, 0) != 1 || r_stop_byte != STOP_BYTE)
-        printf("ERROR in receiving stop byte 0x%02X \n", r_stop_byte); // 检查文件结束符
-    r_stop_byte = 'e';                                                 // 重置
-
-    // unsigned char s_stop_byte = 0xFF;
-    // send(sock,s_stop_byte,sizeof(STOP_BYTE),0);
-
-
-    // 写入文件
-    char file_path[40] = DOWNLOAD_PATH;
-    strcat(file_path, req);
-    printf("file_path %s \n", file_path);
-    FILE *fp = fopen(file_path, "wb"); // 以二进制模式打开文件，并返回文件指针
-    if (fp == NULL)
     {
-        perror("fopen");
-        exit(EXIT_FAILURE);
+        printf("ERROR in receiving stop byte 0x%02X \n", r_stop_byte);
     }
-    fwrite(video_segement, 1, file_size, fp);
+    else
+    {
+        printf("File transfer completed successfully.\n");
+    }
 
-    /***数据接收完成阶段***/
-
-    // 释放内存
-    free(video_segement);
-    video_segement = NULL;
-
-    /*************************************************************************************/
-    /*********任务2（扩展）：如何在视频流传输完成后，通知server结束视频传输？*************/
-    /*************************************************************************************/
+    // 向服务器发送确认信息（可选）
+    s_stop_byte = 0xFF;
+    send(sock, &s_stop_byte, sizeof(s_stop_byte), 0);
 
     /***结束阶段***/
     closesocket(sock);
     WSACleanup();
+    printf("Connection closed.\n");
 
+    // Keep command window open until user chooses to exit
+    printf("\nPress Enter key to exit...");
+    getchar();
+    
     return 0;
 }
