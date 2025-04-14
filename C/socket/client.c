@@ -81,18 +81,16 @@ int main()
         // 处理内存分配失败的情况，可能需要退出程序
         return -1;
     }
+
     int recv_count = 0;
-
     char* video_buffer = malloc(BUFFER_SIZE);
-    FILE* file_ptr = fopen(video_segement,"wb");
-
     while (recv_count < file_size)
     {
         int byte_received = recv(sock,video_buffer,BUFFER_SIZE,0);
         if(byte_received < 0){
             perror("Error occurred.");
         }
-        size_t bytes_written = fwrite(video_buffer,1,byte_received,file_ptr);
+        memcpy(video_segement + recv_count, video_buffer, byte_received);
         recv_count += byte_received;
         /************************************************************************/
         /***************** 任务3 ： 如何使用buffer接收视频文件？*****************/

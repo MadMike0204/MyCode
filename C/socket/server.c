@@ -127,7 +127,8 @@ int main()
         while (send_count < file_size)
         {
             size_t byte_read = fread(video_buffer,1,BUFFER_SIZE,file_ptr);
-                
+            
+            
             if(byte_read == 0){
                 if(feof(file_ptr)){
                     printf("Encounter the end of the file");
@@ -137,12 +138,12 @@ int main()
                 break;
             }
             bytes_sent = send(new_socket,video_buffer,byte_read,0);
-            printf("-Send-%d",send_count);
+            send_count += bytes_sent;
+            // printf("-Send-%d\n",send_count);
             if(bytes_sent < 0){
                 perror("Sending failed.");
                 break;
             }
-            send_count += bytes_sent;
             /***************************************************************************************************/
             /**************************  任务1： 发送指定视频文件（按照固定大小buffer方式） ********************/
             /***************************************************************************************************/
