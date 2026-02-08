@@ -72,7 +72,7 @@ Cstr operator - (const Cstr &s1,const Cstr &s2)
     tp.p = temp;
 
     char* location;
-    location = strstr(s1.p,s2.p); // strstr返回出现字符首地址
+    location = strstr(s1.p,s2.p); //
     
     for(int i=0;i<tp.length;i++)
     {
